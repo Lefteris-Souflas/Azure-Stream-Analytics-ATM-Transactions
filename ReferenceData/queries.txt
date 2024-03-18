@@ -1,0 +1,121 @@
+SELECT
+    a.*
+INTO
+    [output1]
+FROM
+    [input1] a INNER JOIN [atm]b ON a.ATMCode = b.atm_code
+	
+SELECT
+    d.area_city as "ATM area", c.first_name, c.last_name, c.age, c.gender, e.area_city as "customer area",
+    a.Type, a.Amount, a.EventEnqueuedUtcTime as "UTC Time"
+INTO
+    [output1]
+FROM
+    [input1] a INNER JOIN [atm] b ON a.ATMCode = b.atm_code
+    INNER JOIN [customer] c ON a.CardNumber = c.card_number
+    INNER JOIN [area] d ON d.area_code = b.area_code
+    INNER JOIN [area] e ON e.area_code = c.area_code
+
+-------------------------------------------------------------------
+Queries
+-1------------------------------------------------------------------
+SELECT
+    Type, ATMCode, SUM(Amount)
+INTO
+    [output1]
+FROM
+    [input1]
+WHERE
+    Type = 0 and ATMCode = 21
+GROUP BY Type, ATMCode, SlidingWindow(minute,10)
+-2------------------------------------------------------------------
+SELECT
+    Type, ATMCode, SUM(Amount)
+INTO
+    [output1]
+FROM
+    [input1]
+WHERE
+    Type = 1 and ATMCode = 21
+GROUP BY Type, ATMCode, TumblingWindow(hour,1)
+-3------------------------------------------------------------------
+SELECT
+    Type, ATMCode, SUM(Amount)
+INTO
+    [output1]
+FROM
+    [input1]
+WHERE
+    Type = 1 and ATMCode = 21
+GROUP BY Type, ATMCode, HoppingWindow(minute,60,30)
+-4------------------------------------------------------------------
+SELECT
+    Type, ATMCode, SUM(Amount)
+INTO
+    [output1]
+FROM
+    [input1]
+WHERE
+    Type = 1
+GROUP BY Type, ATMCode, SlidingWindow(hour,1)
+-5------------------------------------------------------------------
+SELECT
+    a.Type, b.area_code, SUM(a.Amount)
+INTO
+    [output1]
+FROM
+    [input1] a INNER JOIN [atm] b ON a.ATMCode = b.atm_code
+WHERE
+    a.Type = 1
+GROUP BY a.Type, b.area_code, TumblingWindow(hour,1)
+-6------------------------------------------------------------------
+SELECT
+    d.area_city as "ATM City", c.gender, SUM(a.Amount)
+INTO
+    [output1]
+FROM
+    [input1] a INNER JOIN [atm] b ON a.ATMCode = b.atm_code
+    INNER JOIN [customer] c ON a.CardNumber = c.card_number
+    INNER JOIN [area] d ON d.area_code = b.area_code
+GROUP BY d.area_city, c.gender, TumblingWindow(hour,1)
+-7------------------------------------------------------------------
+SELECT
+    1 as "ALERT"
+INTO
+    [output1]
+FROM
+    [input1]
+WHERE
+    Type = 1
+GROUP BY Type, CardNumber, SlidingWindow(hour,1)
+HAVING COUNT(Amount) >= 2
+-8------------------------------------------------------------------
+SELECT
+    1 as "ALERT"
+INTO
+    [output1]
+FROM
+    [input1] a INNER JOIN [atm] b ON a.ATMCode = b.atm_code
+    INNER JOIN [customer] c ON a.CardNumber = c.card_number
+    INNER JOIN [area] d ON d.area_code = b.area_code
+    INNER JOIN [area] e ON e.area_code = c.area_code
+WHERE
+    b.area_code != c.area_code
+
+
+WITH a AS (
+    SELECT
+        a.ATMCode, a.CardNumber, COUNT(a.Amount)
+    FROM
+        [input1] a INNER JOIN [atm] b ON a.ATMCode = b.atm_code
+        INNER JOIN [customer] c ON a.CardNumber = c.card_number
+        INNER JOIN [area] d ON d.area_code = b.area_code
+        INNER JOIN [area] e ON e.area_code = c.area_code
+    WHERE b.area_code != c.area_code
+    GROUP BY a.ATMCode, a.CardNumber, SlidingWindow(minute,5)
+)
+SELECT 
+    1 as "ALERT"
+INTO
+    [output1]
+FROM a

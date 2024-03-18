@@ -2,8 +2,6 @@
 
 ## Assignment #3
 
-**Due Date:** January 15th, 11:59pm
-
 In this assignment, you will utilize Azure Stream Analytics to process a data stream of ATM transactions and answer stream queries. Follow the steps below to complete the assignment:
 
 ### Steps:

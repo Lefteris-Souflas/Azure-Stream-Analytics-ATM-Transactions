@@ -1,6 +1,8 @@
 # Modern Data Management & Business Intelligence
 
-## Assignment #3
+Assignment 3 for the Data Management and Business Intelligence Course of AUEB's MSc in Business Analytics
+
+## Description
 
 In this assignment, you will utilize Azure Stream Analytics to process a data stream of ATM transactions and answer stream queries. Follow the steps below to complete the assignment:
 
